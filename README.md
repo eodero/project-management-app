@@ -27,4 +27,6 @@ User
 8. CORS
 9. express-rate-limit
 10. express validator
+11. morgan
+12. nodemon
  
