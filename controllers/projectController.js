@@ -1,12 +1,12 @@
 const Project = require('../models/projectModel');
 const asyncWrapper = require('../utils/asyncWrapper');
 const { StatusCodes } = require('http-status-codes');
-const { BadRequestError, UnauthenticatedError } = require('../errors');
+const { NotFoundError, BadRequestError } = require('../errors-handlers/index') 
 
 const createProject = asyncWrapper (async (req, res) => {
-    const newProject = await Project.create(req.body);
-    
-    res.status(StatusCodes.CREATED).json({ newProject });
+  req.body.createdBy = req.user.userId
+  const project = await Project.create(req.body)
+  res.status(StatusCodes.CREATED).json({ job })
     });
     
 const getAllProjects = asyncWrapper (async (req, res) => {
