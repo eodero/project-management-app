@@ -6,7 +6,7 @@ const { NotFoundError, BadRequestError } = require('../errors-handlers/index')
 const createProject = asyncWrapper (async (req, res) => {
   req.body.createdBy = req.user.userId
   const project = await Project.create(req.body)
-  res.status(StatusCodes.CREATED).json({ job })
+  res.status(StatusCodes.CREATED).json({ project })
     });
     
 const getAllProjects = asyncWrapper (async (req, res) => {
@@ -23,10 +23,7 @@ const getAllProjects = asyncWrapper (async (req, res) => {
     
 const getProject = asyncWrapper (async (req, res) => {
   
-  const { user: { userId }, params: { id: projectId } } = req
-  const project = await Project.findOne({ _id: projectId,
-  createdBy: userId });
-  
+  const project = await Project.findById(req.params.id);
   if(!project) {
     throw new NotFoundError(`No project with id ${projectID}`);
   }
@@ -36,33 +33,36 @@ const getProject = asyncWrapper (async (req, res) => {
     });
 
 const updateProject = asyncWrapper(async (req, res) => {
-  const{ 
-    body: {task, dueDate, assignedTo, description},
-    user: {userId},
-    params: {id: projectId}
-  } = req;
-  
-  if (task === '' || dueDate === '' || assignedTo === '' || description === '') {
-    throw new BadRequestError('All fields must be provided');
-  }
-  
-  const project = await Project.findByIdAndUpdate({_id: projectId, createdBy: userId}, req.body, {new: true, runValidators:true});
+  // const{ 
+  //   body: {task, dueDate, assignedTo, description},
+  //   user: {userId},
+  //   params: {id: projectId}
+  // } = req;
+  const project = await Project.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
   
   if(!project) {
-    throw new NotFoundError(`No project with id ${projectId}`);
+    throw new NotFoundError('No project with that id', 404);
   }
-  res.status(StatusCodes.OK).json({ project });
+  res.status(StatusCodes.OK).json({ 
+    status: 'success',
+    data: {
+      project
+    ,} 
    });
+  });
 
 const deleteProject = asyncWrapper (async (req, res) => {
-  const { user: { userId }, params: { id: projectId } } = req
-  
-  const project = await Project.findByIdAndRemove({_id: projectId, createdBy: userId});
-  
+  const project = await Project.findByIdAndRemove(req.params.id);
   if(!project) {
-    throw new NotFoundError(`No project with id ${projectID}`);
+    throw new NotFoundError('No project with id', 404);
   };
-  res.status(StatusCodes.OK).send();
+  res.status(StatusCodes.OK).json({
+    status: 'success',
+    data: null,
+  });
 });
 
 module.exports = {

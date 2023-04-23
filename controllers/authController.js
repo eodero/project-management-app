@@ -5,30 +5,53 @@ const asyncWrapper = require('../utils/asyncWrapper');
 const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, UnauthenticatedError, CustomAPIError } = require('../errors-handlers/index');
 
+const signToken = (id) => (
+    jwt.sign({id}, process.env.JWT_SECRET, {expiresIn: process.env.JWT_LIFETIME})
+);
+
+const createSendToken = (user,statusCode, res) => {
+    const token = signToken(user._id);
+    res.status(statusCode).json({
+        status: 'success',
+        token,
+        data:{
+            user
+        }
+    })
+};
+
+
 const register = asyncWrapper (async (req, res, next) => {
-    const user = await User.create({ ...req.body });
-    const token = user.createJWT();
+    const user = new User(req.body);
+    await user.save();
     
-    res.status(StatusCodes.CREATED).json({ user: {name: user.name}, token })
+    createSendToken(user, 201, res);
+    
 });
 
-const login = asyncWrapper( async(req, res) => {
-    const {email, password} = req.body;
+const login = asyncWrapper( async(req, res, next) => {
+    const { email, password } = req.body;
     
     if(!email || !password) {
-        throw new BadRequestError('Please provide email and password');
+        return next(new BadRequestError('Please provide email and password'));
     }
     
-    const user = await User.findOne({ email });
-    if(!user) {
-        throw new UnauthenticatedError('Invalid Credentials');
+    console.log('Email', email);
+    console.log('Password', password);
+    
+    
+    const user = await User.findOne({ email, }).select('+password');
+    console.log(user);
+    
+    if(!user ) {
+        throw new UnauthenticatedError('Invalid email or password');
     }
-    
-    const isPasswordCorrect = await user.comparePassword(password);
-    if(!isPasswordCorrect) {
-        throw new UnauthenticatedError('Invalid credentials')
-    };
-    
+    const isPasswordCorrect = await user.correctPassword(password, user.password);
+    console.log('isPasswordCorrect', isPasswordCorrect)
+    if(!isPasswordCorrect){
+        throw new UnauthenticatedError('Invalid email or password');
+    }
+
     const token = user.createJWT()
     res.status(StatusCodes.OK).json({user: {name: user.name}, token})
 })
@@ -52,14 +75,6 @@ const protectRoute = asyncWrapper(async (req, res, next) => {
     if(!refreshedUser){
         return next(new CustomAPIError('The user no longer exist', 401))
     }
-    // if (refreshedUser.changedPasswordAfter(decoded.iat)) {
-    //     return next(
-    //       new CustomAPIError(
-    //         'The user recently changed password, please log in again',
-    //         401
-    //       )
-    //     );
-    //   }
   
     req.user = refreshedUser;
     next();
