@@ -16,7 +16,6 @@ const UserSchema = new mongoose.Schema({
         lowercase: true,
         match: [/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/, 'Please provide a valid email'],
     },
-    photo: {String},
     password: {
         type: String,
         required: [true, 'Please provide a password'],
@@ -24,6 +23,8 @@ const UserSchema = new mongoose.Schema({
         trim: true,
         select: false
     },
+    photo: {String},
+    
 });
 
 UserSchema.pre('save', async function(next) {
