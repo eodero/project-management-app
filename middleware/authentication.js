@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const asyncWrapper = require('../utils/asyncWrapper');
-const { StatusCodes } = require('http-status-codes');
 const { UnauthenticatedError } = require('../errors-handlers/index');
 
 const auth = asyncWrapper (async (req, res, next) => {
@@ -10,12 +9,14 @@ const auth = asyncWrapper (async (req, res, next) => {
     } 
     
     const token = authHeader.split(' ')[1];
+    console.log('Received token:', token);
     
     const payload = jwt.verify(token, process.env.JWT_SECRET);
 
+
     
     req.user = { userId: payload.userId,name: payload.name };
-    next(error);
+    next();
 })
 
 module.exports = auth;

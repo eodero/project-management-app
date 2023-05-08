@@ -11,6 +11,19 @@ const signToken = (id) => (
 
 const createSendToken = (user,statusCode, res) => {
     const token = signToken(user._id);
+    const cookieOptions = {
+        expires: new Date(
+            Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+        ),
+        // secure: true,
+        httpOnly: true
+    }
+    if(process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+    
+    res.cookie('jwt', token, cookieOptions);
+    
+    user.password = undefined; //remove password from output
+    
     res.status(statusCode).json({
         status: 'success',
         token,
@@ -36,9 +49,8 @@ const login = asyncWrapper( async(req, res, next) => {
         return next(new BadRequestError('Please provide email and password'));
     }
     
-    console.log('Email', email);
-    console.log('Password', password);
-    
+    // console.log('Email', email);
+    // console.log('Password', password);
     
     const user = await User.findOne({ email, }).select('+password');
     console.log(user);
@@ -52,8 +64,7 @@ const login = asyncWrapper( async(req, res, next) => {
         throw new UnauthenticatedError('Invalid email or password');
     }
 
-    const token = user.createJWT()
-    res.status(StatusCodes.OK).json({user: {name: user.name}, token})
+    createSendToken(user, 200, res);
 })
 
 const protectRoute = asyncWrapper(async (req, res, next) => {

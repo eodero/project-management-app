@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const xss = require('xss-clean');
 const rateLimiter = require('express-rate-limit');
+const cookieParser = require('cookie-parser')
 
 const express = require('express');
 app = express();
@@ -14,7 +15,7 @@ app = express();
 const connectDB = require('./db/connect');
 
 //authentication
-const authenticateUser = require('./middleware/authentication');
+// const authenticateUser = require('./middleware/authentication');
 
 //routers
 const projectRouter = require('./routes/projectRoutes');
@@ -22,7 +23,7 @@ const userRouter = require('./routes/userRoutes');
 
 //error handlers
 const notFoundMiddleWare = require('./middleware/not-found');
-const errorHandlerMiddlerWare = require('./middleware/error-handler');
+// const errorHandlerMiddlerWare = require('./middleware/error-handler');
 
 app.set('trust proxy', 1);
 app.use(
@@ -32,6 +33,7 @@ app.use(
    })
 );
 app.use(express.json());
+app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(helmet());
 app.use(cors());

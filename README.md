@@ -1,5 +1,5 @@
 # Project-Management-App API
-This a RESTful API for a project management app built using Node.js, Express, and MongoDB. This app allows you manage your projects, tasks within the projects and your team or app users. The app has the following in-build features:
+This a RESTful API for a project management app built using Node.js, Express, and MongoDB. The app allows a team to manage  tasks within their projects. The app has the following in-build features:
 
 - User registration and authentication
 - Project creation, reading, update and deletion.
@@ -11,10 +11,12 @@ User
  
  Project
  - GET api/projects - list all projects for authenticated user
- - GET api/projects/:id - get a project by id
+ - GET api/projects/:id - get a project by id - pending front end functionality
  - POST api/projects - create a new project
  - PUT api/projects/:id - update a project
  - DELETE api/projects/:id - delete a project
+ 
+ TODO
  
  Packages in use:
 1. Node.js
